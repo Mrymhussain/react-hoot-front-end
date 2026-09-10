@@ -32,7 +32,6 @@ const App = () => {
   useEffect(() => {
     const fetchAllHoots = async () => {
       const hootsData = await hootService.index();
-
       setHoots(hootsData);
     };
 
@@ -96,9 +95,7 @@ const App = () => {
           <>
             <Route
               path='/hoots'
-              element={
-                <HootList hoots={hoots} />
-              }
+              element={<HootList hoots={hoots} />}
             />
 
             <Route
