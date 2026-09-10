@@ -1,23 +1,25 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useState, useEffect, useContext } from 'react';
+import { useParams, Link } from 'react-router';
+
 import * as hootService from '../../services/hootService';
 
-const HootDetails = () => {
+// Context
+import { UserContext } from '../../contexts/UserContext';
+
+const HootDetails = (props) => {
   const { hootId } = useParams();
+  const { user } = useContext(UserContext);
 
   const [hoot, setHoot] = useState(null);
 
   useEffect(() => {
     const fetchHoot = async () => {
       const hootData = await hootService.show(hootId);
-
       setHoot(hootData);
     };
 
     fetchHoot();
   }, [hootId]);
-
-  console.log('hoot state:', hoot);
 
   if (!hoot) return <main>Loading...</main>;
 
@@ -33,6 +35,16 @@ const HootDetails = () => {
             {`${hoot.author.username} posted on
             ${new Date(hoot.createdAt).toLocaleDateString()}`}
           </p>
+
+          {hoot.author._id === user._id && (
+            <>
+              <Link to={`/hoots/${hootId}/edit`}>Edit</Link>
+
+              <button onClick={() => props.handleDeleteHoot(hootId)}>
+                Delete
+              </button>
+            </>
+          )}
         </header>
 
         <p>{hoot.text}</p>
