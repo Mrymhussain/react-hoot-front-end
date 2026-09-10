@@ -8,6 +8,7 @@ import SignInForm from './components/SignInForm/SignInForm';
 import Dashboard from './components/Dashboard/Dashboard';
 import Landing from './components/Landing/Landing';
 import HootList from './components/HootList/HootList';
+import HootDetails from './components/HootDetails/HootDetails';
 
 // Services
 import * as hootService from './services/hootService';
@@ -61,6 +62,10 @@ const App = () => {
             <Route
               path='/sign-in'
               element={<SignInForm />}
+            />
+            <Route
+              path='/hoots/:hootId'
+              element={<HootDetails />}
             />
           </>
         )}
