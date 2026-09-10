@@ -1,134 +1,76 @@
-import { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router';
-
-import CommentForm from '../CommentForm/CommentForm';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router';
 
 import * as hootService from '../../services/hootService';
 
-// Context
-import { UserContext } from '../../contexts/UserContext';
+const CommentForm = (props) => {
+  const { hootId, commentId } = useParams();
 
-const HootDetails = (props) => {
-  const { hootId } = useParams();
+  const navigate = useNavigate();
 
-  const { user } = useContext(UserContext);
-
-  const [hoot, setHoot] = useState(null);
+  const [formData, setFormData] = useState({
+    text: '',
+  });
 
   useEffect(() => {
     const fetchHoot = async () => {
       const hootData = await hootService.show(hootId);
 
-      setHoot(hootData);
+      setFormData(
+        hootData.comments.find(
+          (comment) => comment._id === commentId
+        )
+      );
     };
 
-    fetchHoot();
-  }, [hootId]);
+    if (hootId && commentId) fetchHoot();
+  }, [hootId, commentId]);
 
-  const handleAddComment = async (commentFormData) => {
-    const newComment = await hootService.createComment(
-      hootId,
-      commentFormData
-    );
-
-    setHoot({
-      ...hoot,
-      comments: [...hoot.comments, newComment],
+  const handleChange = (evt) => {
+    setFormData({
+      ...formData,
+      [evt.target.name]: evt.target.value,
     });
   };
 
-  const handleDeleteComment = async (commentId) => {
-    await hootService.deleteComment(hootId, commentId);
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
 
-    setHoot({
-      ...hoot,
-      comments: hoot.comments.filter(
-        (comment) => comment._id !== commentId
-      ),
-    });
+    if (hootId && commentId) {
+      hootService.updateComment(
+        hootId,
+        commentId,
+        formData
+      );
+
+      navigate(`/hoots/${hootId}`);
+    } else {
+      props.handleAddComment(formData);
+    }
+
+    setFormData({ text: '' });
   };
-
-  if (!hoot) return <main>Loading...</main>;
 
   return (
-    <main>
-      <section>
-        <header>
-          <p>{hoot.category.toUpperCase()}</p>
+    <form onSubmit={handleSubmit}>
+      <label htmlFor='text-input'>
+        Your comment:
+      </label>
 
-          <h1>{hoot.title}</h1>
+      <textarea
+        required
+        type='text'
+        name='text'
+        id='text-input'
+        value={formData.text}
+        onChange={handleChange}
+      />
 
-          <p>
-            {`${hoot.author.username} posted on
-            ${new Date(hoot.createdAt).toLocaleDateString()}`}
-          </p>
-
-          {hoot.author._id === user._id && (
-            <>
-              <Link to={`/hoots/${hootId}/edit`}>
-                Edit
-              </Link>
-
-              <button
-                onClick={() =>
-                  props.handleDeleteHoot(hootId)
-                }
-              >
-                Delete
-              </button>
-            </>
-          )}
-        </header>
-
-        <p>{hoot.text}</p>
-      </section>
-
-      <section>
-        <h2>Comments</h2>
-
-        <CommentForm
-          handleAddComment={handleAddComment}
-        />
-
-        {!hoot.comments.length && (
-          <p>There are no comments.</p>
-        )}
-
-        {hoot.comments.map((comment) => (
-          <article key={comment._id}>
-            <header>
-              <p>
-                {`${comment.author.username} posted on
-                ${new Date(
-                  comment.createdAt
-                ).toLocaleDateString()}`}
-              </p>
-
-              {comment.author._id === user._id && (
-                <>
-                  <Link
-                    to={`/hoots/${hootId}/comments/${comment._id}/edit`}
-                  >
-                    Edit
-                  </Link>
-
-                  <button
-                    onClick={() =>
-                      handleDeleteComment(comment._id)
-                    }
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </header>
-
-            <p>{comment.text}</p>
-          </article>
-        ))}
-      </section>
-    </main>
+      <button type='submit'>
+        {commentId ? 'UPDATE COMMENT' : 'SUBMIT COMMENT'}
+      </button>
+    </form>
   );
 };
 
-export default HootDetails;
+export default CommentForm;
