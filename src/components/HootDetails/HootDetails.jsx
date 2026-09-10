@@ -1,6 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router';
 
+import CommentForm from '../CommentForm/CommentForm';
+
 import * as hootService from '../../services/hootService';
 
 // Context
@@ -8,6 +10,7 @@ import { UserContext } from '../../contexts/UserContext';
 
 const HootDetails = (props) => {
   const { hootId } = useParams();
+
   const { user } = useContext(UserContext);
 
   const [hoot, setHoot] = useState(null);
@@ -15,11 +18,35 @@ const HootDetails = (props) => {
   useEffect(() => {
     const fetchHoot = async () => {
       const hootData = await hootService.show(hootId);
+
       setHoot(hootData);
     };
 
     fetchHoot();
   }, [hootId]);
+
+  const handleAddComment = async (commentFormData) => {
+    const newComment = await hootService.createComment(
+      hootId,
+      commentFormData
+    );
+
+    setHoot({
+      ...hoot,
+      comments: [...hoot.comments, newComment],
+    });
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    await hootService.deleteComment(hootId, commentId);
+
+    setHoot({
+      ...hoot,
+      comments: hoot.comments.filter(
+        (comment) => comment._id !== commentId
+      ),
+    });
+  };
 
   if (!hoot) return <main>Loading...</main>;
 
@@ -38,9 +65,15 @@ const HootDetails = (props) => {
 
           {hoot.author._id === user._id && (
             <>
-              <Link to={`/hoots/${hootId}/edit`}>Edit</Link>
+              <Link to={`/hoots/${hootId}/edit`}>
+                Edit
+              </Link>
 
-              <button onClick={() => props.handleDeleteHoot(hootId)}>
+              <button
+                onClick={() =>
+                  props.handleDeleteHoot(hootId)
+                }
+              >
                 Delete
               </button>
             </>
@@ -53,15 +86,41 @@ const HootDetails = (props) => {
       <section>
         <h2>Comments</h2>
 
-        {!hoot.comments.length && <p>There are no comments.</p>}
+        <CommentForm
+          handleAddComment={handleAddComment}
+        />
+
+        {!hoot.comments.length && (
+          <p>There are no comments.</p>
+        )}
 
         {hoot.comments.map((comment) => (
           <article key={comment._id}>
             <header>
               <p>
                 {`${comment.author.username} posted on
-                ${new Date(comment.createdAt).toLocaleDateString()}`}
+                ${new Date(
+                  comment.createdAt
+                ).toLocaleDateString()}`}
               </p>
+
+              {comment.author._id === user._id && (
+                <>
+                  <Link
+                    to={`/hoots/${hootId}/comments/${comment._id}/edit`}
+                  >
+                    Edit
+                  </Link>
+
+                  <button
+                    onClick={() =>
+                      handleDeleteComment(comment._id)
+                    }
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
             </header>
 
             <p>{comment.text}</p>

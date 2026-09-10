@@ -1,5 +1,9 @@
 import { useContext, useState, useEffect } from 'react';
-import { Route, Routes, useNavigate } from 'react-router';
+import {
+  Route,
+  Routes,
+  useNavigate,
+} from 'react-router';
 
 // Components
 import NavBar from './components/NavBar/NavBar';
@@ -10,6 +14,7 @@ import Landing from './components/Landing/Landing';
 import HootList from './components/HootList/HootList';
 import HootDetails from './components/HootDetails/HootDetails';
 import HootForm from './components/HootForm/HootForm';
+import CommentForm from './components/CommentForm/CommentForm';
 
 // Services
 import * as hootService from './services/hootService';
@@ -27,6 +32,7 @@ const App = () => {
   useEffect(() => {
     const fetchAllHoots = async () => {
       const hootsData = await hootService.index();
+
       setHoots(hootsData);
     };
 
@@ -34,7 +40,9 @@ const App = () => {
   }, [user]);
 
   const handleAddHoot = async (hootFormData) => {
-    const newHoot = await hootService.create(hootFormData);
+    const newHoot = await hootService.create(
+      hootFormData
+    );
 
     setHoots([newHoot, ...hoots]);
 
@@ -42,16 +50,22 @@ const App = () => {
   };
 
   const handleDeleteHoot = async (hootId) => {
-    const deletedHoot = await hootService.deleteHoot(hootId);
+    const deletedHoot =
+      await hootService.deleteHoot(hootId);
 
     setHoots(
-      hoots.filter((hoot) => hoot._id !== deletedHoot._id)
+      hoots.filter(
+        (hoot) => hoot._id !== deletedHoot._id
+      )
     );
 
     navigate('/hoots');
   };
 
-  const handleUpdateHoot = async (hootId, hootFormData) => {
+  const handleUpdateHoot = async (
+    hootId,
+    hootFormData
+  ) => {
     const updatedHoot = await hootService.update(
       hootId,
       hootFormData
@@ -73,28 +87,36 @@ const App = () => {
       <Routes>
         <Route
           path='/'
-          element={user ? <Dashboard /> : <Landing />}
+          element={
+            user ? <Dashboard /> : <Landing />
+          }
         />
 
         {user ? (
           <>
-            {/* Protected routes */}
-
             <Route
               path='/hoots'
-              element={<HootList hoots={hoots} />}
+              element={
+                <HootList hoots={hoots} />
+              }
             />
 
             <Route
               path='/hoots/new'
-              element={<HootForm handleAddHoot={handleAddHoot} />}
+              element={
+                <HootForm
+                  handleAddHoot={handleAddHoot}
+                />
+              }
             />
 
             <Route
               path='/hoots/:hootId'
               element={
                 <HootDetails
-                  handleDeleteHoot={handleDeleteHoot}
+                  handleDeleteHoot={
+                    handleDeleteHoot
+                  }
                 />
               }
             />
@@ -103,15 +125,20 @@ const App = () => {
               path='/hoots/:hootId/edit'
               element={
                 <HootForm
-                  handleUpdateHoot={handleUpdateHoot}
+                  handleUpdateHoot={
+                    handleUpdateHoot
+                  }
                 />
               }
+            />
+
+            <Route
+              path='/hoots/:hootId/comments/:commentId/edit'
+              element={<CommentForm />}
             />
           </>
         ) : (
           <>
-            {/* Non-user routes */}
-
             <Route
               path='/sign-up'
               element={<SignUpForm />}
