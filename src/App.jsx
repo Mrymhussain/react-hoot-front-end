@@ -1,15 +1,10 @@
 import { useContext, useState, useEffect } from 'react';
-import {
-  Route,
-  Routes,
-  useNavigate,
-} from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 
 // Components
 import NavBar from './components/NavBar/NavBar';
 import SignUpForm from './components/SignUpForm/SignUpForm';
 import SignInForm from './components/SignInForm/SignInForm';
-import Dashboard from './components/Dashboard/Dashboard';
 import Landing from './components/Landing/Landing';
 import HootList from './components/HootList/HootList';
 import HootDetails from './components/HootDetails/HootDetails';
@@ -32,6 +27,7 @@ const App = () => {
   useEffect(() => {
     const fetchAllHoots = async () => {
       const hootsData = await hootService.index();
+
       setHoots(hootsData);
     };
 
@@ -39,9 +35,7 @@ const App = () => {
   }, [user]);
 
   const handleAddHoot = async (hootFormData) => {
-    const newHoot = await hootService.create(
-      hootFormData
-    );
+    const newHoot = await hootService.create(hootFormData);
 
     setHoots([newHoot, ...hoots]);
 
@@ -49,22 +43,16 @@ const App = () => {
   };
 
   const handleDeleteHoot = async (hootId) => {
-    const deletedHoot =
-      await hootService.deleteHoot(hootId);
+    const deletedHoot = await hootService.deleteHoot(hootId);
 
     setHoots(
-      hoots.filter(
-        (hoot) => hoot._id !== deletedHoot._id
-      )
+      hoots.filter((hoot) => hoot._id !== deletedHoot._id)
     );
 
     navigate('/hoots');
   };
 
-  const handleUpdateHoot = async (
-    hootId,
-    hootFormData
-  ) => {
+  const handleUpdateHoot = async (hootId, hootFormData) => {
     const updatedHoot = await hootService.update(
       hootId,
       hootFormData
@@ -84,15 +72,11 @@ const App = () => {
       <NavBar />
 
       <Routes>
-        <Route
-          path='/'
-          element={
-            user ? <Dashboard /> : <Landing />
-          }
-        />
+        <Route path='/' element={<Landing />} />
 
         {user ? (
           <>
+            {/* Protected routes */}
             <Route
               path='/hoots'
               element={<HootList hoots={hoots} />}
@@ -111,9 +95,7 @@ const App = () => {
               path='/hoots/:hootId'
               element={
                 <HootDetails
-                  handleDeleteHoot={
-                    handleDeleteHoot
-                  }
+                  handleDeleteHoot={handleDeleteHoot}
                 />
               }
             />
@@ -122,9 +104,7 @@ const App = () => {
               path='/hoots/:hootId/edit'
               element={
                 <HootForm
-                  handleUpdateHoot={
-                    handleUpdateHoot
-                  }
+                  handleUpdateHoot={handleUpdateHoot}
                 />
               }
             />
@@ -136,6 +116,7 @@ const App = () => {
           </>
         ) : (
           <>
+            {/* Non-user routes */}
             <Route
               path='/sign-up'
               element={<SignUpForm />}
