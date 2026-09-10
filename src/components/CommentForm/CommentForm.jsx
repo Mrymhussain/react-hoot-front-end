@@ -53,7 +53,7 @@ const CommentForm = (props) => {
     setFormData({ text: '' });
   };
 
-  if (hootId && commentId)
+  if (hootId && commentId) {
     return (
       <main className={styles.container}>
         <form onSubmit={handleSubmit}>
@@ -76,6 +76,7 @@ const CommentForm = (props) => {
         </form>
       </main>
     );
+  }
 
   return (
     <form onSubmit={handleSubmit}>

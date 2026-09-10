@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 
 import * as hootService from '../../services/hootService';
+import Loading from '../Loading/Loading';
 
 const CommentForm = (props) => {
   const { hootId, commentId } = useParams();
