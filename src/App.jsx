@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
-import { Route, Routes } from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 
 // Components
 import NavBar from './components/NavBar/NavBar';
@@ -9,6 +9,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Landing from './components/Landing/Landing';
 import HootList from './components/HootList/HootList';
 import HootDetails from './components/HootDetails/HootDetails';
+import HootForm from './components/HootForm/HootForm';
 
 // Services
 import * as hootService from './services/hootService';
@@ -21,17 +22,25 @@ const App = () => {
 
   const [hoots, setHoots] = useState([]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchAllHoots = async () => {
       const hootsData = await hootService.index();
-
-      console.log('hootsData:', hootsData);
 
       setHoots(hootsData);
     };
 
     if (user) fetchAllHoots();
   }, [user]);
+
+  const handleAddHoot = async (hootFormData) => {
+    const newHoot = await hootService.create(hootFormData);
+
+    setHoots([newHoot, ...hoots]);
+
+    navigate('/hoots');
+  };
 
   return (
     <>
@@ -46,14 +55,26 @@ const App = () => {
         {user ? (
           <>
             {/* Protected routes */}
+
             <Route
               path='/hoots'
               element={<HootList hoots={hoots} />}
+            />
+
+            <Route
+              path='/hoots/new'
+              element={<HootForm handleAddHoot={handleAddHoot} />}
+            />
+
+            <Route
+              path='/hoots/:hootId'
+              element={<HootDetails />}
             />
           </>
         ) : (
           <>
             {/* Non-user routes */}
+
             <Route
               path='/sign-up'
               element={<SignUpForm />}
@@ -62,10 +83,6 @@ const App = () => {
             <Route
               path='/sign-in'
               element={<SignInForm />}
-            />
-            <Route
-              path='/hoots/:hootId'
-              element={<HootDetails />}
             />
           </>
         )}
